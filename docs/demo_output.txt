@@ -1,0 +1,32 @@
+
+== 1. Identities ==
+  3 x RSA-3072 keys generated in 0.89s
+  [ok] central-hospital  30:88:BF:00:1F:30:5B:B9:E9:61:36:57:D2:18:78:E5...
+  [ok] satellite-clinic  83:EC:AA:A3:D1:01:FC:6C:DA:9A:91:5F:C8:FC:58:9F...
+  Fingerprints are compared out-of-band (phone call) before trusting a key.
+
+== 2. Sealed envelope: hospital -> clinic ==
+  plaintext 110 B -> envelope 1589 B (JSON)
+  [ok] clinic verified the signature and decrypted the record
+
+== 3. Attacks on the envelope ==
+  [blocked] bit-flip in ciphertext: BadSignature: signature does not match the pinned sender key
+  [blocked] mallory impersonates hospital: BadSignature: signature does not match the pinned sender key
+  [blocked] replay of captured envelope: Replayed: message y/JDGzo9lNW+GUo87TsIyQ== was already accepted
+  [blocked] one-hour-old envelope: Expired: envelope age 3601s is outside the 300s window
+  [blocked] mallory opens envelope meant for clinic: WrongRecipient: envelope was sealed for a different key
+
+== 4. Why hybrid? RSA alone vs RSA + AES-GCM ==
+  RSA-3072 OAEP can encrypt at most 318 bytes per operation
+  [ok] 512 KB with RSA only: 1649 operations, 127 ms to encrypt, ~3311 ms to decrypt
+  [ok] 512 KB with AES-256-GCM: 0.49 ms (+1 RSA op to wrap the key)
+
+== 5. Key exchange: X25519 with and without authentication ==
+  [ok] unauthenticated X25519: both sides derived 32a6a1956a27fe41...
+  Now Mallory intercepts and substitutes her own ephemeral keys:
+  [MITM] hospital key 315fde819af9... == mallory's; clinic key 1591d2b65d7e... == mallory's. Mallory reads everything.
+  Same attack, but each hello is signed with the RSA identity key:
+  [blocked] mallory's substituted key: HandshakeError: hello claiming to be 'satellite-clinic' is not authentic
+  [ok] authenticated X25519: genuine peers agree on 1150ca5e56ddf479..., forward secret
+
+All checks passed.
