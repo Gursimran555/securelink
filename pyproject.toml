@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "securelink"
+version = "1.0.0"
+description = "Authenticated hybrid encryption (RSA-OAEP + AES-256-GCM + RSA-PSS) and MITM-resistant X25519 key exchange, with attack demos."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Gursimran Singh" }]
+dependencies = ["cryptography>=42"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+securelink = "securelink.cli:main"
+
+[tool.setuptools]
+packages = ["securelink"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
